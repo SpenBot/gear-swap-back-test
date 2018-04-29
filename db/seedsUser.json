@@ -1,0 +1,80 @@
+[
+
+
+  {
+    "username": "spenser.holstein@gmail.com",
+    "zipcode": 11530,
+    "rating": 3,
+    "password": "poopy123",
+    "photo_url": "https://blog.dar.org/sites/default/files/default_images/icon-user-default.png",
+    "inventory": [
+      {
+        "item": "Sony A7S2",
+        "type": "camera",
+        "condition": "good",
+        "price": 35
+      },
+      {
+        "item": "Arri 1500w Fresnel",
+        "type": "light",
+        "condition": "good",
+        "price": 40
+      },
+      {
+        "item": "Rode NTG-3",
+        "type": "microphone",
+        "condition": "good",
+        "price": 20
+      }
+    ]
+  },
+
+
+  {
+    "username": "rody.dog@gmail.com",
+    "zipcode": 20815,
+    "rating": 5,
+    "password": "weewee123",
+    "photo_url": "https://blog.dar.org/sites/default/files/default_images/icon-user-default.png",
+    "inventory": [
+      {
+        "item": "Canon 24-70 2.8f",
+        "type": "lens",
+        "condition": "good",
+        "price": 45
+      },
+      {
+        "item": "Atomos Ninja Assassin",
+        "type": "monitor",
+        "condition": "good",
+        "price": 55
+      }
+    ]
+  },
+
+
+  {
+    "username": "montyy.mouse@gmail.com",
+    "zipcode": 20815,
+    "rating": 4,    
+    "password": "almond123",
+    "photo_url": "https://blog.dar.org/sites/default/files/default_images/icon-user-default.png",
+    "inventory": [
+      {
+        "item": "Zoom H4N",
+        "type": "audio recorder",
+        "condition": "good",
+        "price": 15
+      },
+      {
+        "item": "Panasonic GH2",
+        "type": "camera",
+        "condition": "good",
+        "price": 25
+      }
+    ]
+  }
+
+
+
+]

@@ -1,110 +1,114 @@
 
-/////////////// CONFIGURATION //////////////////////////////////////
-////////////////////////////////////////////////////////////////////
+////////////// SERVER CONFIGURATION /////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 
+/// require external module dependencies ///
 const express = require('express')
-const app = express()
+const bodyParser = require('body-parser')
 const cors = require('cors')
 
+// require models from models.js //
+const Models = require('./db/models.js')
+
+/// require database connection module ///
+const mongoose = require('./db/connection.js')
+
+/// run app as an express application ///
+const app = express();
+
+
+
+/// handles json post requests (needed for AJAX requests with JSON bodies) ///
+app.use(bodyParser.json())
+/// handles form submissions ///
+app.use(bodyParser.urlencoded({ extended: true }))
+
+
+// use cors //
 app.use(cors())
 
-/////////////// SOCKET CONFIG /////////////////////////////////////
-const http = require('http')
-const socketIO = require('socket.io')
-const server = http.createServer(app)
-const io = socketIO.listen(server)
 
 
-server.listen(process.env.PORT || 4000, () => {
-// server.listen(4000, () => {
-    console.log("\n\tServer active. Listening on port.\n")
+
+
+
+////////////// RUN SERVER ///////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
+app.set('port', process.env.PORT || 4000)
+
+app.listen(app.get('port'), () => {
+    console.log(`\n\tServer active. Listening on port ${app.get('port')}\n`)
 })
 
 
 
 
 
-/////////////// INDEX ROUTE ///////////////////////////////////////
-app.get("/", (req, res) => {
-  res.send("Hello Monkey")
+////////////// ROUTES ///////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
+// grab each model, from exported models //
+const User = Models.User
+
+
+
+// USERS ROUTES //
+
+// get all users //
+app.get('/api/users', (req, res) => {
+  User.find()
+    .then((users) => {
+      res.json(users)
+    })
+    .catch((err) => {
+      console.log(err)
+    })
 })
 
+// get one user //
+app.get("/api/users/:username", (req, res) => {
+  User.findOne({username: req.params.username}).then(function(user){
+    res.json(user)
+    });
+  });
 
+// create user //
+app.post("/api/users", (req, res) => {
+  User.create(req.body).then(user => {
+    console.log("post api/users", req.body);
+    console.log("user:", user)
+    res.json(user)
 
+  });
+});
 
-/////////////// SOCKET EVENTS //////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-
-io.on('connection', (socket) => {
-  console.log('\n\tUser Connected')
-
-/////////////// CHAT MESSAGES //////////////////////////////////////
-
-  socket.on('chat message', (msg) => io.emit('chat message', msg))
-
-/////////////// PLAYERS ////////////////////////////////////////////
-
-  socket.on('new player1', (player1) => {
-    io.emit('new player1', player1)
+// update user //
+app.put('/api/users/:username', (req, res) => {
+  console.log(`Put method called ${req}`)
+  User.findOneAndUpdate({username: req.params.username}, req.body, {new: true}).then(user => {
+    res.json(user)
   })
-  socket.on('new player2', (player2) => {
-    io.emit('new player2', player2)
-  })
+})
 
-/////////////// TURNS ////////////////////////////////////////////
-  socket.on('new Turn', (newTurn, newP1Coin, newP1OP, newP2Coin, newP2OP) => {
-    io.emit(`new Turn`, newTurn, newP1Coin, newP1OP, newP2Coin, newP2OP)
-  })
+// delete user //
+app.delete("api/users/:username/delete", (req, res) => {
+  User.findOneAndRemove({username: req.params.username})
+    .then(() => {
+      res.json("/users")
+    })
+})
 
-/////////////// SLAP ///////////////////////////////////////////////
-
-  socket.on('P1 slaps', (slapP2Health, slapP1Coin, slapP1OP) => {
-    io.emit(`P1 slaps`, slapP2Health, slapP1Coin, slapP1OP)
-  })
-
-  socket.on('P2 slaps', (slapP1Health, slapP2Coin, slapP2OP) => {
-    io.emit(`P2 slaps`, slapP1Health, slapP2Coin, slapP2OP)
-  })
-
-/////////////// PUNCH ///////////////////////////////////////////////
-
-  socket.on('P1 punches', (punchP2Health, punchP1Coin, punchP1OP) => {
-    io.emit(`P1 punches`, punchP2Health, punchP1Coin, punchP1OP)
-  })
-  socket.on('P2 punches', (punchP1Health, punchP2Coin, punchP2OP) => {
-    io.emit(`P2 punches`, punchP1Health, punchP2Coin, punchP2OP)
-  })
-
-/////////////// MUD ///////////////////////////////////////////////
-  socket.on('P1 muds', (mudP2Health, mudP1Coin, mudP1OP) => {
-    io.emit(`P1 muds`, mudP2Health, mudP1Coin, mudP1OP)
-  })
-
-  socket.on('P2 muds', (mudP1Health, mudP2Coin, mudP2OP) => {
-    io.emit(`P2 muds`, mudP1Health, mudP2Coin, mudP2OP)
-  })
-
-/////////////// OVERFLOW //////////////////////////////////////
-  socket.on('P1 overflows', (overflowP1Coin, overflowP1OP) => {
-    io.emit('P1 overflows', overflowP1Coin, overflowP1OP)
-  })
-
-  socket.on('P2 overflows', (overflowP2Coin, overflowP2OP) => {
-    io.emit('P2 overflows', overflowP2Coin, overflowP2OP)
-  })
-
-/////////////// CACHE //////////////////////////////////////
-  socket.on('P1 coinrestore', (coinrestoreP1Coin, coinrestoreP1OP) => {
-    io.emit('P1 coinrestore', coinrestoreP1Coin, coinrestoreP1OP)
-  })
-
-  socket.on('P2 coinrestore', (coinrestoreP2Coin, coinrestoreP2OP) => {
-    io.emit('P2 coinrestore', coinrestoreP2Coin, coinrestoreP2OP)
-  })
+// root homepage redirect
+app.get('/', (req, res) => res.redirect('/api/users'))
 
 
+// ZIPCODE FOR USERS ROUTES //
 
-
-
-  socket.on('disconnect', () => console.log('\n\tUser Disconnected'))
+// get all users by zipcode //
+app.get("/api/userszipcode/:zipcode", (req, res) => {
+  User.find({zipcode: req.params.zipcode})
+    .then((users) => {
+      res.json(users)
+    })
 })
